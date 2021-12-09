@@ -1,0 +1,7 @@
+cmake_minimum_required(VERSION 3.10)
+project(fqs VERSION 1.0.0 DESCRIPTION "fqs")
+set(CMAKE_C_COMPILER "/Library/Developer/CommandLineTools/usr/bin/clang")
+set(CMAKE_CXX_COMPILER "/Library/Developer/CommandLineTools/usr/bin/clang++")
+include_directories(../include)
+add_executable(fqs main.cpp)
+target_compile_features(fqs PUBLIC cxx_std_20)
