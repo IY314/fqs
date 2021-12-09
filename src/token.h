@@ -1,9 +1,14 @@
 #ifndef token_h
 #define token_h
 
+#define NUMBERS "0123456789"
+#define LITERALS "()"
+#define OPERATORS "+-*/"
+
 #include "position.h"
 #include <variant>
 #include <string>
+#include <optional>
 
 namespace fqs {
     enum token_type {
@@ -25,7 +30,7 @@ namespace fqs {
         ot_div
     };
 
-    typedef std::variant<nullptr_t, int, std::string, literal_type, operator_type> token_value;
+    typedef std::optional<std::variant<int, std::string, literal_type, operator_type>> token_value;
 
     class token {
         public:
@@ -33,7 +38,7 @@ namespace fqs {
         token_value value;
         position pos_start, pos_end;
 
-        token(token_type, token_value);
+        token(token_type, token_value, position, std::optional<position>);
         std::string to_string();
     };
 }
