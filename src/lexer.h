@@ -3,15 +3,19 @@
 
 #include "position.h"
 #include "token.h"
+#include "error.h"
 #include <string>
 #include <vector>
 #include <variant>
 
 namespace fqs {
+    typedef std::vector<token> vec_token;
+    typedef std::variant<vec_token, base_error> lexer_result;
+
     class lexer {
         public:
         lexer(std::string, std::string);
-        std::variant<std::vector<token>> make_tokens();
+        std::variant<std::vector<token>, base_error> make_tokens();
 
         private:
         std::string fn, text;

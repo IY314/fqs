@@ -1,3 +1,4 @@
+/*
 #include <iostream>
 #include <vector>
 #include <string>
@@ -130,7 +131,7 @@ class lexer {
 
     static inline const char *NUMBERS = "0123456789";
     static inline const char *LITERALS = "()";
-    static inline const char *OPERATORS = "+-*/";
+    static inline const char *OPERATORS = "+-*\";
 
     void advance() {
         pos.advance();
@@ -169,10 +170,15 @@ class lexer {
         }
     }
 };
+*/
+
+#include "build_code.h"
+#include <iostream>
+#include <string>
 
 int main(int argc, char *argv[]) {
-    cout << "fqs > ";
-    string text;
-    getline(cin, text);
-    cout << text << endl;
+    std::cout << "fqs > ";
+    std::string text;
+    std::getline(std::cin, text);
+    fqs::run(std::string("<stdin>"), text);
 }

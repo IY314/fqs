@@ -18,13 +18,13 @@ std::string fqs::token::to_string() {
     std::stringstream ss;
     switch (type) {
         case tt_num:
-        ss << "NUM:" << get<int>(value.value());
+        ss << "NUM:" << std::get<int>(value.value());
         break;
         case tt_lit:
-        ss << "LIT:" << get<fqs::literal_type>(value.value());
+        ss << "LIT:" << std::get<fqs::literal_type>(value.value());
         break;
         case tt_op:
-        ss << "OP:" << get<fqs::operator_type>(value.value());
+        ss << "OP:" << std::get<fqs::operator_type>(value.value());
         break;
         case tt_eof:
         ss << "EOF";

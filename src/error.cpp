@@ -1,5 +1,6 @@
 #include "error.h"
 #include "position.h"
+#include "util.h"
 #include <string>
 #include <sstream>
 
@@ -10,6 +11,8 @@ std::string fqs::base_error::to_string() {
     std::stringstream ss;
     ss << error_name << ": " << details << std::endl;
     ss << "File " << pos_start.fn << ", line " << pos_start.ln + 1;
+    ss << "\n\n" << fqs::str_with_arrows(pos_start.ftxt, pos_start, pos_end);
+    return ss.str();
 }
 
 fqs::illegal_char_error::illegal_char_error(fqs::position _pos_start, fqs::position _pos_end, std::string _details)

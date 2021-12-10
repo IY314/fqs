@@ -2,9 +2,11 @@
 #include "position.h"
 #include "token.h"
 #include "util.h"
+#include "error.h"
 #include <string>
 #include <vector>
 #include <variant>
+#include <sstream>
 
 fqs::lexer::lexer(std::string _fn, std::string _text)
                  : fn{_fn}, text{_text} {
@@ -17,7 +19,7 @@ void fqs::lexer::advance() {
     current_char = pos.idx < text.size() ? text[pos.idx] : '\0';
 }
 
-std::variant<std::vector<fqs::token>> fqs::lexer::make_tokens() {
+std::variant<std::vector<fqs::token>, fqs::base_error> fqs::lexer::make_tokens() {
     std::vector<fqs::token> tokens;
 
     while (current_char != '\0') {
@@ -32,10 +34,24 @@ std::variant<std::vector<fqs::token>> fqs::lexer::make_tokens() {
             pos_start = pos;
             char ch = current_char;
             advance();
-            // TODO: return error
+            return fqs::illegal_char_error(pos_start, pos, std::string(1, ch));
         }
     }
 
     tokens.push_back(fqs::token(fqs::tt_eof, {}, pos, {}));
     return tokens;
+}
+
+fqs::token fqs::lexer::make_number() {
+    std::stringstream ss;
+    int result;
+    fqs::position pos_start;
+    pos_start = pos;
+
+    while (fqs::is_char_in(NUMBERS, current_char)) {
+        ss << current_char;
+    }
+
+    ss >> result;
+    return fqs::token(fqs::tt_num, result, pos_start, pos);
 }
