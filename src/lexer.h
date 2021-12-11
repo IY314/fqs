@@ -24,8 +24,8 @@ namespace fqs {
 
         void advance();
         token make_number();
-        token make_literal();
-        token make_operator();
+        std::variant<token, base_error> make_literal();
+        std::variant<token, base_error> make_operator();
     };
 }
 
