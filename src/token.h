@@ -8,9 +8,14 @@
 #include "position.h"
 #include <variant>
 #include <string>
+#include <vector>
 #include <optional>
 
 namespace fqs {
+    class token;
+
+    typedef std::vector<token> vec_token;
+    
     enum token_type {
         tt_num,
         tt_lit,

@@ -175,10 +175,19 @@ class lexer {
 #include "build_code.h"
 #include <iostream>
 #include <string>
+#include <utility>
 
 int main(int argc, char *argv[]) {
-    std::cout << "fqs > ";
-    std::string text;
-    std::getline(std::cin, text);
-    fqs::run(std::string("<stdin>"), text);
+    while (true) {
+        std::cout << "fqs > ";
+        std::string text;
+        std::getline(std::cin, text);
+        std::pair result = fqs::run(std::string("<stdin>"), text);
+
+        if (result.second) {
+            std::cout << result.second.value().to_string() << std::endl;
+        } else {
+            std::cout << result.first.value().to_string() << std::endl;
+        }
+    }
 }

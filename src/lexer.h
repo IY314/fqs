@@ -9,7 +9,6 @@
 #include <variant>
 
 namespace fqs {
-    typedef std::vector<token> vec_token;
     typedef std::variant<vec_token, base_error> lexer_result;
 
     class lexer {

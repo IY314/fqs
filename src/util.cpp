@@ -1,12 +1,29 @@
 #include "util.h"
 #include "position.h"
+#include "token.h"
 #include <string>
 #include <sstream>
 #include <algorithm>
+#include <vector>
 
 bool fqs::is_char_in(const char *str, char ch) {
     return std::string(str).find(ch) != std::string::npos;
 }
+
+template<typename T> bool fqs::is_elem_in(std::vector<T> vec, T elem) {
+    return std::find(vec.begin(), vec.end(), elem) != vec.end();
+}
+
+template bool fqs::is_elem_in(std::vector<fqs::operator_type>, fqs::operator_type);
+
+/*bool fqs::test(std::vector<fqs::operator_type> vec, fqs::operator_type elem) {
+    for (fqs::operator_type e : vec) {
+        if (e == elem) {
+            return true;
+        }
+    }
+    return false;
+}*/
 
 std::string fqs::str_with_arrows(std::string text, fqs::position pos_start, fqs::position pos_end) {
     std::stringstream ss;

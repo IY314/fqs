@@ -20,6 +20,11 @@ namespace fqs {
         public:
         illegal_char_error(position, position, std::string);
     };
+
+    class invalid_syntax_error: public base_error {
+        public:
+        invalid_syntax_error(position, position, std::string);
+    };
 }
 
 #endif

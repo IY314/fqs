@@ -4,8 +4,9 @@
 #include <string>
 #include <sstream>
 
-fqs::token::token(fqs::token_type _type, fqs::token_value _value, fqs::position _pos_start, std::optional<fqs::position> _pos_end)
-                 : type{_type}, value{_value}, pos_start{_pos_start} {
+fqs::token::token(fqs::token_type _type, fqs::token_value _value,
+                  fqs::position _pos_start, std::optional<fqs::position> _pos_end)
+                 : type(_type), value(_value), pos_start(_pos_start) {
     if (_pos_end.has_value()) {
         pos_end = _pos_end.value();
     } else {

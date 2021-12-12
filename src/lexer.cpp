@@ -10,9 +10,7 @@
 #include <optional>
 
 fqs::lexer::lexer(std::string _fn, std::string _text)
-                 : fn{_fn}, text{_text} {
-    pos = position(-1, 0, -1, fn, text);
-    current_char = '\0';
+                 : fn(_fn), text(_text), pos(position(-1, 0, -1, fn, text)), current_char('\0') {
     advance();
 }
 

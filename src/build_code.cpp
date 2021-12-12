@@ -1,21 +1,24 @@
 #include "build_code.h"
 #include "lexer.h"
 #include "error.h"
+#include "parser.h"
+#include "node.h"
+#include <variant>
+#include <optional>
+#include <utility>
 #include <iostream>
 
-void fqs::run(std::string fn, std::string text) {
+std::pair<std::optional<fqs::node>, std::optional<fqs::base_error>> fqs::run(std::string fn, std::string text) {
     fqs::lexer l(fn, text);
     fqs::lexer_result lex_result = l.make_tokens();
+    if (std::get_if<fqs::base_error>(&lex_result) != nullptr) {
+        return {{}, std::get<fqs::base_error>(lex_result)};
+    }
 
-    // TODO: add AST tree parsing
+    fqs::parser p(std::get<fqs::vec_token>(lex_result));
+    fqs::parse_result parse_result = p.parse();
 
     // TODO: add tree evaluation
 
-    if (std::get_if<fqs::base_error>(&lex_result) != nullptr) {
-        std::cout << std::get<fqs::base_error>(lex_result).to_string() << std::endl;
-    } else {
-        for (auto tok : std::get<fqs::vec_token>(lex_result)) {
-            std::cout << tok.to_string() << std::endl;
-        }
-    }
+    return {parse_result.nd, parse_result.error};
 }
