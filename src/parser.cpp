@@ -6,7 +6,6 @@
 #include <variant>
 #include <optional>
 #include <functional>
-#include <iostream>
 
 fqs::parse_result::parse_result()
                                : nd({}), error({}) {}
@@ -17,7 +16,7 @@ std::variant<fqs::node, fqs::token> fqs::parse_result::register_(std::variant<fq
         if (pr_res.error) {
             error = pr_res.error;
         }
-        return pr_res.nd.value();
+        if (pr_res.nd) return pr_res.nd.value();
     }
     if (std::get_if<fqs::node>(&res) == nullptr) {
         return std::get<fqs::token>(res);
@@ -46,34 +45,29 @@ fqs::token fqs::parser::advance() {
     if (tok_idx < tokens.size()) {
         current_tok = tokens[tok_idx];
     }
-    std::cout << "advance, &current_tok=" << &current_tok << "\n";
+
     return current_tok.value();
 }
 
 fqs::parse_result fqs::parser::parse() {
-    try {
-        fqs::parse_result res = expr();
+    fqs::parse_result res = expr();
 
-        if (!res.error && current_tok.value().type != tt_eof) {
-            return res.failure(invalid_syntax_error(
-                current_tok.value().pos_start, current_tok.value().pos_end,
-                "Expected '+', '-', '*', or '/'"
-            ));
-        }
-
-        return res;
-    } catch (std::bad_optional_access e) {
-        std::cout << e.what() << "\n";
+    if (!res.error && current_tok.value().type != tt_eof) {
+        return res.failure(invalid_syntax_error(
+            current_tok.value().pos_start, current_tok.value().pos_end,
+            "Expected '+', '-', '*', or '/'"
+        ));
     }
+
+    return res;
 }
 
-fqs::parse_result fqs::parser::bin_op(std::function<parse_result(fqs::parser *)> func, std::vector<operator_type> ops) {
+fqs::parse_result fqs::parser::bin_op(std::function<fqs::parse_result(fqs::parser *)> func, std::vector<fqs::operator_type> ops) {
     fqs::parse_result res;
     fqs::node left = std::get<fqs::node>(res.register_(func(this)));
     if (res.error) return res;
 
-    while (fqs::is_elem_in<fqs::operator_type>(ops, std::get<fqs::operator_type>(current_tok.value().value.value()))) {
-    std::cout << "bin_op\n";
+    while (current_tok && current_tok.value().value && fqs::is_elem_in<fqs::operator_type>(ops, std::get<fqs::operator_type>(current_tok.value().value.value()))) {
         fqs::token op_tok = current_tok.value();
         res.register_(advance());
         fqs::node right = std::get<fqs::node>(res.register_(func(this)));
@@ -85,18 +79,15 @@ fqs::parse_result fqs::parser::bin_op(std::function<parse_result(fqs::parser *)>
 }
 
 fqs::parse_result fqs::parser::expr() {
-    std::cout << "expr\n";
     return bin_op(&fqs::parser::term, std::vector{fqs::ot_plus, fqs::ot_minus});
 }
 
 fqs::parse_result fqs::parser::term() {
-    std::cout << "term\n";
     return bin_op(&fqs::parser::factor, std::vector{fqs::ot_mul, fqs::ot_div});
 }
 
 fqs::parse_result fqs::parser::factor() {
     fqs::parse_result res;
-    std::cout << "factor\n";
     fqs::token tok = current_tok.value();
 
     if (tok.type == fqs::tt_op && fqs::is_elem_in<fqs::operator_type>(std::vector(fqs::ot_plus, fqs::ot_minus), std::get<fqs::operator_type>(tok.value.value()))) {
