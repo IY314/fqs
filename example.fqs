@@ -2,12 +2,12 @@ module example {
     define int EXIT_SUCCESS = 0;
 
     // Main function
-    function main(sysargs args[r] /* Readable indicator for args */) :> int {
+    function main(sysargs args:r /* Readable indicator for args */) :> int {
         // Make a constant variable hello_world_str of type string; inferred length
-        str[*] hello_world_str! = "Hello World\n";
+        str[] hello_world_str! = "Hello World\n";
 
-        // Make a list of strings with lengths less than 4; length of 4
-        list<str[..4]>[4] strings = {};
+        // Make a list of strings with lengths of 4; length of 4
+        list<str[4]>[4] strings;
 
         // Print a clone of hello_world_str
         print(#hello_world_str);
@@ -15,17 +15,14 @@ module example {
         return $EXIT_SUCCESS;
     }
 
-    // Define a class Prism
-    class Prism {
-        @auto(
-            // All attributes in the @auto macro are set up with a constructor
-            int length,
-            int height,
-            int width
-        );
+    // Define a struct Prism
+    struct Prism {
+        int length, width, height;
+    }
 
-        function volume() :> int {
-            return length * height * width;
+    object Human {
+        new(str name) {
+            ;
         }
     }
 }

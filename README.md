@@ -11,6 +11,6 @@ See `example.fqs` for an example.
 ```sh
 git clone https://github.com/IY314/fqs.git
 cd fqs
-make build
+make
 ./bin/fqs
 ```
