@@ -5,13 +5,12 @@ See `example.fqs` for an example.
 ## Installation
 ### Prerequisites
 - C++
-- CMake
 - Git
+- Make
 
 ```sh
 git clone https://github.com/IY314/fqs.git
-cd fqs/src
-cmake ../bin
-cmake --build .
-./fqs
+cd fqs
+make build
+./bin/fqs
 ```
