@@ -15,7 +15,7 @@ fqs::lex::Lexer::Lexer(const std::string& fn, const std::string& text)
     advance();
 }
 
-std::vector<fqs::token::Token> fqs::lex::Lexer::makeTokens() {
+fqs::lex::Lexer::LexerResult fqs::lex::Lexer::makeTokens() {
     std::vector<fqs::token::Token> tokens;
 
     while (currentChar != '\0') {
@@ -28,15 +28,22 @@ std::vector<fqs::token::Token> fqs::lex::Lexer::makeTokens() {
         else if (util::strcontains(LETTERS, currentChar))
             tokens.push_back(makeIdentifier());
         else if (util::strcontains(LITCHARS, currentChar)) {
-            fqs::token::Token tok = makeLiteral();
+            const fqs::token::Token& tok = makeLiteral();
             if (!tok) {
-                // TODO
+                return fqs::err::FQSUnknownLitError(
+                    tok.posStart, tok.posEnd, std::get<std::string>(tok.value));
             }
             tokens.push_back(tok);
         } else {
-            // TODO
+            const fqs::pos::Pos& posStart(currentPos);
+            char ch = currentChar;
+            advance();
+            return fqs::err::FQSIllegalCharError(posStart, currentPos, {1, ch});
         }
     }
+
+    tokens.push_back(fqs::token::Token(fqs::token::TT_EOF, currentPos));
+    return tokens;
 }
 
 void fqs::lex::Lexer::advance() {
@@ -49,7 +56,7 @@ void fqs::lex::Lexer::advance() {
 fqs::token::Token fqs::lex::Lexer::makeNumber() {
     std::ostringstream result;
     bool isFloat = false;
-    fqs::pos::Pos posStart(currentPos);
+    const fqs::pos::Pos& posStart(currentPos);
 
     while (util::strcontains({DIGITS, "."}, currentChar)) {
         if (currentChar == '.') {
@@ -72,7 +79,7 @@ fqs::token::Token fqs::lex::Lexer::makeNumber() {
 fqs::token::Token fqs::lex::Lexer::makeString(char quote) {
     std::ostringstream result;
     bool escaped = false;
-    fqs::pos::Pos posStart(currentPos);
+    const fqs::pos::Pos& posStart(currentPos);
 
     do {
         if (escaped) {
@@ -104,7 +111,7 @@ fqs::token::Token fqs::lex::Lexer::makeString(char quote) {
 
 fqs::token::Token fqs::lex::Lexer::makeIdentifier() {
     std::ostringstream result;
-    fqs::pos::Pos posStart(currentPos);
+    const fqs::pos::Pos& posStart(currentPos);
 
     while (util::strcontains({LETTERS, DIGITS, "_"}, currentChar)) {
         result << currentChar;
@@ -122,7 +129,7 @@ fqs::token::Token fqs::lex::Lexer::makeIdentifier() {
 
 fqs::token::Token fqs::lex::Lexer::makeLiteral() {
     std::ostringstream result;
-    fqs::pos::Pos posStart(currentPos);
+    const fqs::pos::Pos& posStart(currentPos);
 
     while (util::strcontains(LITCHARS, currentChar)) {
         result << currentChar;
@@ -145,5 +152,6 @@ fqs::token::Token fqs::lex::Lexer::makeLiteral() {
             }
         }
     }
-    return fqs::token::Token(fqs::token::TT_NULL, posStart);
+    return fqs::token::Token(fqs::token::TT_NULL, literal, posStart,
+                             currentPos);
 }

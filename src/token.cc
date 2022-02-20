@@ -23,9 +23,9 @@ fqs::token::Token::Token(fqs::token::TokenType type,
 fqs::token::Token::operator bool() const { return type != fqs::token::TT_NULL; }
 
 bool fqs::token::Token::isKeyword(const std::string& identifier) {
-    std::vector<std::string> keywords{"module", "define", "function",
-                                      "return", "struct", "object"};
-    return util::veccontains(keywords, identifier);
+    return util::veccontains(
+        {"module", "define", "function", "return", "struct", "object"},
+        identifier);
 }
 
 void fqs::token::Token::setValues(fqs::token::TokenType type,
