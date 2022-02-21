@@ -4,17 +4,17 @@
 #include "token.hh"
 #include "util.hh"
 
-fqs::token::Token::Token(fqs::token::TokenType type, const fqs::pos::Pos& pos) {
+fqs::token::Token::Token(fqs::tt::TokenType type, const fqs::pos::Pos& pos) {
     init(type, NULL_TOK, pos);
 }
 
-fqs::token::Token::Token(fqs::token::TokenType type,
+fqs::token::Token::Token(fqs::tt::TokenType type,
                          const fqs::token::TokenValue& value,
                          const fqs::pos::Pos& pos) {
     init(type, value, pos);
 }
 
-fqs::token::Token::Token(fqs::token::TokenType type,
+fqs::token::Token::Token(fqs::tt::TokenType type,
                          const fqs::token::TokenValue& value,
                          const fqs::pos::Pos& posStart,
                          const fqs::pos::Pos& posEnd) {
@@ -41,7 +41,7 @@ std::string fqs::token::Token::str() const {
     }
 }
 
-fqs::token::Token::operator bool() const { return type != fqs::token::TT_NULL; }
+fqs::token::Token::operator bool() const { return type != fqs::tt::TT_NULL; }
 
 bool fqs::token::Token::isKeyword(const std::string& identifier) {
     return util::veccontains(
@@ -49,7 +49,7 @@ bool fqs::token::Token::isKeyword(const std::string& identifier) {
         identifier);
 }
 
-void fqs::token::Token::setValues(fqs::token::TokenType type,
+void fqs::token::Token::setValues(fqs::tt::TokenType type,
                                   const fqs::token::TokenValue& value,
                                   const fqs::pos::Pos& posStart) {
     this->type = type;
@@ -57,7 +57,7 @@ void fqs::token::Token::setValues(fqs::token::TokenType type,
     this->posStart = posStart;
 }
 
-void fqs::token::Token::init(fqs::token::TokenType type,
+void fqs::token::Token::init(fqs::tt::TokenType type,
                              const fqs::token::TokenValue& value,
                              const fqs::pos::Pos& pos) {
     setValues(type, value, pos);
@@ -65,7 +65,7 @@ void fqs::token::Token::init(fqs::token::TokenType type,
     posEnd.advance();
 }
 
-void fqs::token::Token::init(fqs::token::TokenType type,
+void fqs::token::Token::init(fqs::tt::TokenType type,
                              const fqs::token::TokenValue& value,
                              const fqs::pos::Pos& posStart,
                              const pos::Pos& posEnd) {

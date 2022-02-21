@@ -4,7 +4,7 @@
 
 #define DIGITS "0123456789"
 #define LETTERS "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-#define LITCHARS "+-*/%()[]{}=!<>&|^:$#"
+#define LITOPCHARS "+-*/%()[]{}=!<>&|^:$#"
 
 fqs::lex::Lexer::Lexer(const std::string& fn, const std::string& text)
     : currentPos(-1, 0, -1, fn, text) {
@@ -22,7 +22,7 @@ fqs::lex::Lexer::LexerResult fqs::lex::Lexer::makeTokens() {
             advance();
         else if (currentChar == ';') {
             tokens.push_back(
-                fqs::token::Token(fqs::token::TT_SEMICOLON, currentPos));
+                fqs::token::Token(fqs::tt::TT_SEMICOLON, currentPos));
             advance();
         } else if (util::strcontains(DIGITS, currentChar))
             tokens.push_back(makeNumber());
@@ -30,7 +30,7 @@ fqs::lex::Lexer::LexerResult fqs::lex::Lexer::makeTokens() {
             tokens.push_back(makeString(currentChar));
         else if (util::strcontains(LETTERS, currentChar))
             tokens.push_back(makeIdentifier());
-        else if (util::strcontains(LITCHARS, currentChar)) {
+        else if (util::strcontains(LITOPCHARS, currentChar)) {
             const fqs::token::Token& tok = makeLiteral();
             if (!tok) {
                 return fqs::err::FQSUnknownLitError(
@@ -40,7 +40,7 @@ fqs::lex::Lexer::LexerResult fqs::lex::Lexer::makeTokens() {
             const fqs::pos::Pos start(currentPos);
             bool hasStar = false;
             switch (type) {
-                case fqs::token::LT_COMMENT:
+                case fqs::tt::LT_COMMENT:
                     while (currentChar != '\0') {
                         advance();
                         if (currentChar == '\n') {
@@ -49,7 +49,7 @@ fqs::lex::Lexer::LexerResult fqs::lex::Lexer::makeTokens() {
                         }
                     }
                     break;
-                case fqs::token::LT_STARTMULTILINE:
+                case fqs::tt::LT_STARTMULTILINE:
                     while (true) {
                         advance();
                         if (currentChar == '*' && !hasStar) {
@@ -76,7 +76,7 @@ fqs::lex::Lexer::LexerResult fqs::lex::Lexer::makeTokens() {
         }
     }
 
-    tokens.push_back(fqs::token::Token(fqs::token::TT_EOF, currentPos));
+    tokens.push_back(fqs::token::Token(fqs::tt::TT_EOF, currentPos));
     return tokens;
 }
 
@@ -102,10 +102,10 @@ fqs::token::Token fqs::lex::Lexer::makeNumber() {
     }
 
     if (isFloat)
-        return fqs::token::Token(fqs::token::TT_FLOAT,
+        return fqs::token::Token(fqs::tt::TT_FLOAT,
                                  std::strtod(result.str().c_str(), nullptr),
                                  posStart, currentPos);
-    return fqs::token::Token(fqs::token::TT_INT,
+    return fqs::token::Token(fqs::tt::TT_INT,
                              std::strtol(result.str().c_str(), nullptr, 10),
                              posStart, currentPos);
 }
@@ -146,7 +146,7 @@ fqs::token::Token fqs::lex::Lexer::makeString(char quote) {
 
     advance();
 
-    return fqs::token::Token(fqs::token::TT_STRING, result.str(), posStart,
+    return fqs::token::Token(fqs::tt::TT_STRING, result.str(), posStart,
                              currentPos);
 }
 
@@ -162,9 +162,9 @@ fqs::token::Token fqs::lex::Lexer::makeIdentifier() {
     std::string identifier = result.str();
 
     if (fqs::token::Token::isKeyword(identifier))
-        return fqs::token::Token(fqs::token::TT_KEYWORD, identifier, posStart,
+        return fqs::token::Token(fqs::tt::TT_KEYWORD, identifier, posStart,
                                  currentPos);
-    return fqs::token::Token(fqs::token::TT_IDENTIFIER, identifier, posStart,
+    return fqs::token::Token(fqs::tt::TT_IDENTIFIER, identifier, posStart,
                              currentPos);
 }
 
@@ -173,17 +173,34 @@ fqs::token::Token fqs::lex::Lexer::makeLiteral() {
     const fqs::pos::Pos& posStart(currentPos);
     fqs::pos::Pos posSnapshot(currentPos);
     long bestValue = 0;
-    std::vector<std::string> literals{
-        "<<=", ">>=", "+=", "-=", "**", "*=", "//", "/*", "/=", "%=", "==",
-        "!=",  "<=",  ">=", "&&", "||", "&=", "|=", "^=", "<<", ">>", ":>",
-        "+",   "-",   "*",  "/",  "%",  "(",  ")",  "[",  "]",  "{",  "}",
-        "=",   "!",   "<",  ">",  "&",  "|",  "^",  ":",  "$",  "#"};
-    while (util::strcontains(LITCHARS, currentChar)) {
+    fqs::tt::TokenType type;
+    std::vector<std::string> literals{"//", "/*", ":>", "(", ")", "[",
+                                      "]",  "{",  "}",  ":", "$", "#"},
+        operators{
+            "**", "==", "!=", "<=", ">=", "&&", "||", "<<", ">>", "+", "-",
+            "*",  "/",  "%",  "=",  "!",  "<",  ">",  "&",  "|",  "^",
+        },
+        assignops{
+            "<<=", ">>=", "+=", "-=", "*=", "/=", "%=", "&=", "|=", "^=",
+        };
+    while (util::strcontains(LITOPCHARS, currentChar)) {
         result << currentChar;
         auto it = std::find(literals.begin(), literals.end(), result.str());
         if (it != literals.end()) {
             bestValue = TT_LENGTH + (it - literals.begin());
             posSnapshot = currentPos;
+            type = fqs::tt::TT_LIT;
+        } else if ((it = std::find(operators.begin(), operators.end(),
+                                   result.str())) != operators.end()) {
+            bestValue = TT_LENGTH + LT_LENGTH + (it - operators.begin());
+            posSnapshot = currentPos;
+            type = fqs::tt::TT_OP;
+        } else if ((it = std::find(assignops.begin(), assignops.end(),
+                                   result.str())) != assignops.end()) {
+            bestValue =
+                TT_LENGTH + LT_LENGTH + OT_LENGTH + (it - assignops.begin());
+            posSnapshot = currentPos;
+            type = fqs::tt::TT_AOP;
         }
         advance();
     }
@@ -191,9 +208,8 @@ fqs::token::Token fqs::lex::Lexer::makeLiteral() {
     if (bestValue) {
         currentPos = posSnapshot;
         advance();
-        return fqs::token::Token(fqs::token::TT_LIT, bestValue, posStart,
-                                 currentPos);
+        return fqs::token::Token(type, bestValue, posStart, currentPos);
     } else
-        return fqs::token::Token(fqs::token::TT_NULL, result.str(), posStart,
+        return fqs::token::Token(fqs::tt::TT_NULL, result.str(), posStart,
                                  currentPos);
 }
