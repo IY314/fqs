@@ -8,6 +8,8 @@
 #define TT_LENGTH 16
 #define LT_LENGTH 64
 
+#define NULL_TOK -1
+
 namespace fqs::token {
 enum TokenType {
     TT_INT,
@@ -23,44 +25,49 @@ enum TokenType {
 };
 
 enum LiteralType {
-    LT_PLUS = TT_LENGTH,
+    LT_LSHIFTASSIGN = TT_LENGTH,  // 16
+    LT_RSHIFTASSIGN,
+    LT_ADDASSIGN,
+    LT_SUBASSIGN,
+    LT_DOUBLESTAR,  // 20
+    LT_MULASSIGN,
+    LT_COMMENT,
+    LT_STARTMULTILINE,
+    LT_DIVASSIGN,
+    LT_MODASSIGN,  // 25
+    LT_EQUALS,
+    LT_NOTEQUALS,
+    LT_LESSEQUALS,
+    LT_GREATEREQUALS,
+    LT_AND,  // 30
+    LT_OR,
+    LT_BITANDASSIGN,
+    LT_BITORASSIGN,
+    LT_BITXORASSIGN,
+    LT_LSHIFT,  // 35
+    LT_RSHIFT,
+    LT_RETURN,
+    LT_PLUS,
     LT_DASH,
-    LT_STAR,
+    LT_STAR,  // 40
     LT_SLASH,
     LT_MOD,
     LT_LPAREN,
     LT_RPAREN,
-    LT_LBRACKET,
+    LT_LBRACKET,  // 45
     LT_RBRACKET,
     LT_LBRACE,
     LT_RBRACE,
     LT_ASSIGN,
-    LT_ADDASSIGN,
-    LT_SUBASSIGN,
-    LT_MULASSIGN,
-    LT_DIVASSIGN,
-    LT_MODASSIGN,
-    LT_BANG,
-    LT_EQUALS,
-    LT_NOTEQUALS,
-    LT_LESSTHAN,
-    LT_GREATERTHAN,
-    LT_LESSEQUALS,
-    LT_GREATEREQUALS,
-    LT_AND,
-    LT_OR,
+    LT_BANG,  // 50
+    LT_LANGLE,
+    LT_RANGLE,
     LT_BITAND,
     LT_BITOR,
-    LT_BITXOR,
-    LT_BITANDASSIGN,
-    LT_BITORASSIGN,
-    LT_BITXORASSIGN,
-    LT_LSHIFT,
-    LT_RSHIFT,
-    LT_RETURN,
+    LT_BITXOR,  // 55
     LT_COLON,
-    LT_REFDEF,
-    LT_HASH
+    LT_DOLLAR,
+    LT_OCTOTHORPE  // 58
 };
 
 enum Keyword {
@@ -86,6 +93,8 @@ struct Token {
 
     Token(TokenType type, const TokenValue& value, const pos::Pos& posStart,
           const pos::Pos& posEnd);
+
+    std::string str() const;
 
     operator bool() const;
 

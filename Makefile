@@ -1,12 +1,17 @@
 CXX := /usr/bin/c++
-CXXFLAGS := -c -std=c++17 -Wall -Werror -Wextra -Iinclude -Ilib/argparse/include
+WFLAGS := -Wall -Werror -Wextra
+IFLAGS := -Iinclude -Ilib/argparse/include
+CXXFLAGS := -c -std=c++17 ${WFLAGS} ${IFLAGS}
 
 .PHONY: mkbin all clean
 
-all: mkbin main.o pos.o token.o lex.o util.o errors.o
+all: mkbin main.o pos.o token.o lex.o util.o errors.o link
 
 mkbin:
 	mkdir -p bin
+
+link: mkbin
+	${CXX} bin/*.o -o bin/fqs ${WFLAGS}
 
 clean:
 	rm -rf bin

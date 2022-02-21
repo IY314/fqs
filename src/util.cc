@@ -19,6 +19,9 @@ bool util::veccontains(const std::vector<T>& vec, const T& elem) {
     return std::find(vec.begin(), vec.end(), elem) != vec.end();
 }
 
+template bool util::veccontains(const std::vector<std::string>& vec,
+                                const std::string& elem);
+
 std::string util::strreplace(std::string str, const std::string& search,
                              const std::string& replace) {
     size_t pos = 0;

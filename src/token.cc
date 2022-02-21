@@ -1,10 +1,11 @@
+#include <sstream>
 #include <vector>
 
 #include "token.hh"
 #include "util.hh"
 
 fqs::token::Token::Token(fqs::token::TokenType type, const fqs::pos::Pos& pos) {
-    init(type, 0, pos);
+    init(type, NULL_TOK, pos);
 }
 
 fqs::token::Token::Token(fqs::token::TokenType type,
@@ -18,6 +19,26 @@ fqs::token::Token::Token(fqs::token::TokenType type,
                          const fqs::pos::Pos& posStart,
                          const fqs::pos::Pos& posEnd) {
     init(type, value, posStart, posEnd);
+}
+std::string fqs::token::Token::str() const {
+    std::ostringstream result;
+    result << type;
+    if (const auto* v = std::get_if<long>(&value)) {
+        if (*v == NULL_TOK) {
+            return result.str();
+        } else {
+            result << ':' << *v;
+            return result.str();
+        }
+    } else if (const auto* v = std::get_if<std::string>(&value)) {
+        result << ':' << *v;
+        return result.str();
+    } else if (const auto* v = std::get_if<double>(&value)) {
+        result << ':' << *v;
+        return result.str();
+    } else {
+        return "";
+    }
 }
 
 fqs::token::Token::operator bool() const { return type != fqs::token::TT_NULL; }

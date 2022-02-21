@@ -4,7 +4,7 @@ module example {
     // Main function
     function main(sysargs args:r /* Readable indicator for args */) :> int {
         // Make a constant variable hello_world_str of type string; inferred length
-        str[] hello_world_str! = "Hello World\n";
+        str[*] hello_world_str! = "Hello World\n";
 
         // Make a list of strings with lengths of 4; length of 4
         list<str[4]>[4] strings;
@@ -17,7 +17,9 @@ module example {
 
     // Define a struct Prism
     struct Prism {
-        int length, width, height;
+        int length
+        int width;
+        int height;
     }
 
     object Human {

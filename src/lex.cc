@@ -1,5 +1,4 @@
 #include <sstream>
-
 #include "lex.hh"
 #include "util.hh"
 
@@ -19,9 +18,13 @@ fqs::lex::Lexer::LexerResult fqs::lex::Lexer::makeTokens() {
     std::vector<fqs::token::Token> tokens;
 
     while (currentChar != '\0') {
-        if (util::strcontains(" \t", currentChar))
+        if (util::strcontains(" \t\n", currentChar))
             advance();
-        else if (util::strcontains(DIGITS, currentChar))
+        else if (currentChar == ';') {
+            tokens.push_back(
+                fqs::token::Token(fqs::token::TT_SEMICOLON, currentPos));
+            advance();
+        } else if (util::strcontains(DIGITS, currentChar))
             tokens.push_back(makeNumber());
         else if (util::strcontains("'\"", currentChar))
             tokens.push_back(makeString(currentChar));
@@ -33,9 +36,40 @@ fqs::lex::Lexer::LexerResult fqs::lex::Lexer::makeTokens() {
                 return fqs::err::FQSUnknownLitError(
                     tok.posStart, tok.posEnd, std::get<std::string>(tok.value));
             }
-            tokens.push_back(tok);
+            const auto type = std::get<long>(tok.value);
+            const fqs::pos::Pos start(currentPos);
+            bool hasStar = false;
+            switch (type) {
+                case fqs::token::LT_COMMENT:
+                    while (currentChar != '\0') {
+                        advance();
+                        if (currentChar == '\n') {
+                            advance();
+                            break;
+                        }
+                    }
+                    break;
+                case fqs::token::LT_STARTMULTILINE:
+                    while (true) {
+                        advance();
+                        if (currentChar == '*' && !hasStar) {
+                            hasStar = true;
+                        } else if (currentChar == '/' && hasStar) {
+                            advance();
+                            break;
+                        } else if (currentChar == '\0')
+                            return fqs::err::FQSUnclosedCommentError(
+                                start, currentPos);
+                        else
+                            hasStar = false;
+                    }
+                    break;
+                default:
+                    tokens.push_back(tok);
+                    break;
+            }
         } else {
-            const fqs::pos::Pos& posStart(currentPos);
+            const fqs::pos::Pos posStart(currentPos);
             char ch = currentChar;
             advance();
             return fqs::err::FQSIllegalCharError(posStart, currentPos, {1, ch});
@@ -81,6 +115,8 @@ fqs::token::Token fqs::lex::Lexer::makeString(char quote) {
     bool escaped = false;
     const fqs::pos::Pos& posStart(currentPos);
 
+    advance();
+
     do {
         if (escaped) {
             switch (currentChar) {
@@ -100,10 +136,15 @@ fqs::token::Token fqs::lex::Lexer::makeString(char quote) {
             escaped = false;
         } else if (currentChar == '\\')
             escaped = true;
-        else
+        else if (currentChar == quote) {
+            advance();
+            break;
+        } else
             result << currentChar;
         advance();
-    } while ((currentChar != quote) || escaped);
+    } while (currentChar != '\0');
+
+    advance();
 
     return fqs::token::Token(fqs::token::TT_STRING, result.str(), posStart,
                              currentPos);
@@ -130,28 +171,29 @@ fqs::token::Token fqs::lex::Lexer::makeIdentifier() {
 fqs::token::Token fqs::lex::Lexer::makeLiteral() {
     std::ostringstream result;
     const fqs::pos::Pos& posStart(currentPos);
-
+    fqs::pos::Pos posSnapshot(currentPos);
+    long bestValue = 0;
+    std::vector<std::string> literals{
+        "<<=", ">>=", "+=", "-=", "**", "*=", "//", "/*", "/=", "%=", "==",
+        "!=",  "<=",  ">=", "&&", "||", "&=", "|=", "^=", "<<", ">>", ":>",
+        "+",   "-",   "*",  "/",  "%",  "(",  ")",  "[",  "]",  "{",  "}",
+        "=",   "!",   "<",  ">",  "&",  "|",  "^",  ":",  "$",  "#"};
     while (util::strcontains(LITCHARS, currentChar)) {
         result << currentChar;
+        auto it = std::find(literals.begin(), literals.end(), result.str());
+        if (it != literals.end()) {
+            bestValue = TT_LENGTH + (it - literals.begin());
+            posSnapshot = currentPos;
+        }
         advance();
     }
 
-    std::string literal = result.str();
-    std::vector<std::string> literals{
-        "+",  "-",  "*",  "/",  "%",   "(",   ")",  "[", "]",  "{",
-        "}",  "=",  "+=", "-=", "*=",  "/=",  "%=", "!", "==", "!=",
-        "<",  ">",  "<=", ">=", "&&",  "||",  "&",  "|", "^",  "<<",
-        ">>", "&=", "|=", "^=", "<<=", ">>=", ":>", ":", "$",  "#"};
-    if (util::veccontains(literals, literal)) {
-        long value;
-        for (auto it = literals.begin(); it != literals.end(); ++it) {
-            if (literal == *it) {
-                value = TT_LENGTH + (it - literals.begin());
-                return fqs::token::Token(fqs::token::TT_LIT, value, posStart,
-                                         currentPos);
-            }
-        }
-    }
-    return fqs::token::Token(fqs::token::TT_NULL, literal, posStart,
-                             currentPos);
+    if (bestValue) {
+        currentPos = posSnapshot;
+        advance();
+        return fqs::token::Token(fqs::token::TT_LIT, bestValue, posStart,
+                                 currentPos);
+    } else
+        return fqs::token::Token(fqs::token::TT_NULL, result.str(), posStart,
+                                 currentPos);
 }
