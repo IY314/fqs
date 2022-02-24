@@ -4,7 +4,7 @@
 
 #define DIGITS "0123456789"
 #define LETTERS "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-#define LITOPCHARS "+-*/%()[]{}=!<>&|^:$#"
+#define LITOPCHARS "+-*/%()[]{}=!<>&|^:$#,"
 
 fqs::lex::Lexer::Lexer(const std::string& fn, const std::string& text)
     : currentPos(-1, 0, -1, fn, text) {
@@ -174,15 +174,12 @@ fqs::token::Token fqs::lex::Lexer::makeLiteral() {
     fqs::pos::Pos posSnapshot(currentPos);
     long bestValue = 0;
     fqs::tt::TokenType type;
-    std::vector<std::string> literals{"//", "/*", ":>", "(", ")", "[",
-                                      "]",  "{",  "}",  ":", "$", "#"},
-        operators{
-            "**", "==", "!=", "<=", ">=", "&&", "||", "<<", ">>", "+", "-",
-            "*",  "/",  "%",  "=",  "!",  "<",  ">",  "&",  "|",  "^",
-        },
-        assignops{
-            "<<=", ">>=", "+=", "-=", "*=", "/=", "%=", "&=", "|=", "^=",
-        };
+    std::vector<std::string> literals{"//", "/*", ":>", "(", ")", "[", "]",
+                                      "{",  "}",  ":",  "$", "#", ",", "."},
+        operators{"**", "==", "!=", "<=", ">=", "&&", "||", "<<",
+                  ">>", "+",  "-",  "*",  "/",  "%",  "=",  "!",
+                  "<",  ">",  "&",  "|",  "^",  "~"},
+        assignops{"<<=", ">>=", "+=", "-=", "*=", "/=", "%=", "&=", "|=", "^="};
     while (util::strcontains(LITOPCHARS, currentChar)) {
         result << currentChar;
         auto it = std::find(literals.begin(), literals.end(), result.str());

@@ -33,7 +33,9 @@ enum LiteralType {
     LT_RBRACE,
     LT_COLON,  // 25
     LT_DOLLAR,
-    LT_OCTOTHORPE  // 27
+    LT_OCTOTHORPE,
+    LT_COMMA,
+    LT_DOT  // 29
 };
 
 enum OperatorType {
@@ -57,7 +59,8 @@ enum OperatorType {
     OT_RANGLE,  // 65
     OT_BITAND,
     OT_BITOR,
-    OT_BITXOR  // 68
+    OT_BITXOR,
+    OT_BITNOT  // 69
 };
 
 enum AssignOpType {
@@ -70,7 +73,7 @@ enum AssignOpType {
     AOT_MOD,
     AOT_BITAND,
     AOT_BITOR,
-    AOT_BITXOR  // 89
+    AOT_BITXOR,  // 89
 };
 
 enum Keyword {
