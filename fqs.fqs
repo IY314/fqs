@@ -1,4 +1,7 @@
 // Woo, I am a comment!
+/*
+I am also a comment!
+*/
 
 use std::io;
 
@@ -15,11 +18,13 @@ ext string
 
 namespace Foo
 {
-    fun fact(u16 n) => n ? 0: 1, _: fact(n - 1);
+    fun fact(u16 n) => n ?
+                       0: 1,
+                       _: fact(n - 1);
 
     sub main(string[] args)
     {
-        io.outf("fqs says, %s\n", $"Hello World!".surround("\""));
+        io.outf("fqs says, %s\n", "Hello World!".surround("\""));
 
         for (u16 i in [0..<10])
         {
