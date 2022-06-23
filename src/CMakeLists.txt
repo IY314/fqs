@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.23)
 
-set(FQS_SOURCES "main.cpp" "pos.cpp")
+set(FQS_SOURCES "main.cpp" "pos.cpp" "tok.cpp")
 
 add_executable(fqs ${FQS_SOURCES})
 
