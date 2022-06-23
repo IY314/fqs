@@ -15,5 +15,6 @@ namespace fqs
         Pos &operator=(const Pos &other) noexcept = default;
 
         void operator+=(char curr) noexcept;
+        void operator++(int) noexcept;
     };
 }  // namespace fqs
