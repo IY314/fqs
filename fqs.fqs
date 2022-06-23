@@ -1,0 +1,29 @@
+// Woo, I am a comment!
+
+use std::io;
+
+ext string
+{
+    fun surround(utf8 ch) -> string
+    {
+        return ch + this + ch;
+    }
+
+    // could also be written thus:
+    // fun surround(utf8 ch) => ch + this + ch;
+}
+
+namespace Foo
+{
+    fun fact(u16 n) => n ? 0: 1, _: fact(n - 1);
+
+    sub main(string[] args)
+    {
+        io.outf("fqs says, %s\n", $"Hello World!".surround("\""));
+
+        for (u16 i in [0..<10])
+        {
+            io.outf("%d! = %d", i, fact(i));
+        }
+    }
+}
