@@ -1,6 +1,5 @@
 #pragma once
 
-#include <exception>
 #include <optional>
 
 class bad_result_access : std::exception
