@@ -6,8 +6,8 @@ namespace fqs
 {
     struct Pos
     {
-        unsigned long m_idx, m_lnum, m_cnum;
-        std::string m_fname, m_ftext;
+        unsigned long idx, lnum, cnum;
+        std::string fname, ftext;
 
         Pos(const Pos &other) noexcept = default;
         ~Pos() noexcept = default;
@@ -20,14 +20,15 @@ namespace fqs
 
             if (curr == '\n')
             {
-                m_lnum++;
-                m_cnum = 0;
+                lnum++;
+                cnum = 0;
             }
         }
+
         constexpr void operator++(int) noexcept
         {
-            m_idx++;
-            m_cnum++;
+            idx++;
+            cnum++;
         }
     };
 }  // namespace fqs
