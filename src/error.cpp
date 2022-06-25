@@ -27,10 +27,10 @@ namespace fqs::err
         return ret.str();
     }
 
-    FqsIllegalCharError::FqsIllegalCharError(const Pos &start,
-                                             const Pos &end,
+    FqsIllegalCharError::FqsIllegalCharError(const Pos &pos,
                                              const char &ch) noexcept
-        : FqsError(start, end, "Illegal Character", str::quote(ch))
+        : FqsError(pos, pos, "Illegal Character", str::quote(ch))
     {
+        m_end++;
     }
 }  // namespace fqs::err

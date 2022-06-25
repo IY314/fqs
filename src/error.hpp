@@ -14,7 +14,7 @@ namespace fqs::err
 
         virtual std::string toString() const noexcept;
 
-    private:
+    protected:
         Pos m_start, m_end;
         std::string m_name, m_info;
     };
@@ -22,8 +22,6 @@ namespace fqs::err
     class FqsIllegalCharError : public FqsError
     {
     public:
-        FqsIllegalCharError(const Pos &start,
-                            const Pos &end,
-                            const char &ch) noexcept;
+        FqsIllegalCharError(const Pos &pos, const char &ch) noexcept;
     };
 }  // namespace fqs::err
