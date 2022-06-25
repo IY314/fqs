@@ -26,7 +26,7 @@ namespace fqs::tok
             const Pos &end) noexcept;
         Tok(Type type, const Pos &pos) noexcept;
         Tok(Type type, const std::string &value, const Pos &pos) noexcept;
-        Tok(const Tok &other) noexcept = delete;
+        Tok(const Tok &other) noexcept = default;
         ~Tok() noexcept = default;
     };
 }  // namespace fqs::tok

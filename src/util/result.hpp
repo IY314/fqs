@@ -12,12 +12,12 @@ struct Result
     const std::optional<T> ok;
     const std::optional<E> err;
 
-    Result<T, E>(T ok) noexcept : ok(ok), err(std::nullopt) {}
-    Result<T, E>(E err) noexcept : ok(std::nullopt), err(err) {}
+    Result<T, E>(T ok) noexcept : ok(ok) {}
+    Result<T, E>(E err) noexcept : err(err) {}
 
     T value() const noexcept(false)
     {
-        if (ok) return ok;
+        if (ok) return *ok;
         throw new bad_result_access();
     }
 
@@ -27,7 +27,7 @@ struct Result
 
     E error() const noexcept(false)
     {
-        if (err) return err;
+        if (err) return err.value();
         throw new bad_result_access();
     }
 
@@ -35,5 +35,5 @@ struct Result
 
     E error_or(E def) const noexcept { return err.value_or(def); }
 
-    operator bool() const noexcept { return ok; }
+    operator bool() const noexcept { return ok.has_value(); }
 };
