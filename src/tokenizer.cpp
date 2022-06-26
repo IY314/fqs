@@ -2,17 +2,17 @@
 
 #include <sstream>
 
+#include "error/lex-error.hpp"
+
 fqs::tok::Tok number(std::string::const_iterator &it,
                      const std::string::const_iterator &end,
                      fqs::Pos &pos)
 {
-    using fqs::Pos, fqs::tok::Tok;
-
-    const Pos &start(pos);
+    const fqs::Pos &start(pos);
     bool isFloat = false;
     std::ostringstream res;
 
-    while (it != end)
+    while (it != end && (std::isdigit(*it) || *it == '.'))
     {
         if (*it == '.')
         {
@@ -23,25 +23,26 @@ fqs::tok::Tok number(std::string::const_iterator &it,
         it++, pos += *it;
     }
 
-    return Tok(isFloat ? Tok::Type::FLOAT : Tok::Type::INT,
-               res.str(),
-               start,
-               pos);
+    return fqs::tok::Tok(
+        isFloat ? fqs::tok::Tok::Type::FLOAT : fqs::tok::Tok::Type::INT,
+        res.str(),
+        start,
+        pos);
 }
 
-Result<fqs::tok::Tok, int> string(std::string::const_iterator &it,
-                                  const std::string::const_iterator &end,
-                                  fqs::Pos &pos)
+Result<fqs::tok::Tok, fqs::err::FqsError> string(
+    std::string::const_iterator &it,
+    const std::string::const_iterator &end,
+    fqs::Pos &pos)
 {
-    using fqs::Pos, fqs::tok::Tok;
-
-    const Pos &start(pos);
+    const fqs::Pos &start(pos);
     bool escaped;
     std::ostringstream res;
 
     it++, pos += *it;
+    if (it == end) return fqs::err::FqsUnclosedStringError(start, pos);
 
-    while (it != end)
+    while (it != end && (escaped || *it != '"'))
     {
         if (escaped)
         {
@@ -51,19 +52,35 @@ Result<fqs::tok::Tok, int> string(std::string::const_iterator &it,
             case 'n': res << '\n'; break;
             case 'r': res << '\r'; break;
             case 't': res << '\t'; break;
+            case '"': break;
             // TODO: escape codes
-            default: return 1;
+            default:
+                return fqs::err::FqsInvalidEscapeError(
+                    start,
+                    pos,
+                    std::string(1, '\\') + *it);
             }
             escaped = false;
         }
+        else if (*it == '\\')
+            escaped = true;
+        else
+            res << *it;
+
+        it++, pos += *it;
     }
+
+    if (it == end) return fqs::err::FqsUnclosedStringError(start, pos);
+
+    it++, pos += *it;
+
+    return fqs::tok::Tok(fqs::tok::Tok::Type::STRING, res.str(), start, pos);
 }
 
 namespace fqs::tok
 {
-    Result<std::vector<Tok>, int /* placeholder type */> tokenize(
-        const std::string &fname,
-        const std::string &ftext)
+    Result<std::vector<Tok>, err::FqsError> tokenize(const std::string &fname,
+                                                     const std::string &ftext)
     {
         std::vector<Tok> tokens;
         Pos pos{0, 0, 0, fname, ftext};
@@ -80,7 +97,7 @@ namespace fqs::tok
                 int x;
             else if (*it == '"')
             {
-                const Result<Tok, int> &res = string(it, ftext.cend(), pos);
+                const auto &res = string(it, ftext.cend(), pos);
                 if (res)
                     tokens.push_back(*res);
                 else
@@ -91,7 +108,8 @@ namespace fqs::tok
             // TODO: literal
             else
             {
-                // TODO: illegal character
+                const Pos &errPos(pos);
+                return err::FqsIllegalCharError(errPos, *it);
             }
         }
 
